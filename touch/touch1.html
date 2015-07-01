@@ -1,0 +1,87 @@
+<!doctype HTML>
+<html>
+<head>
+	<title></title>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+	<style type="text/css">
+       *{
+       	padding: 0px;
+       	margin: 0px;
+       }
+       html,body{
+       	  width: 100%;
+       	  height: 100%;
+       }
+
+	.spirit {              /* 方块的class名称*/
+	         position: absolute;
+	         width: 50px;
+	         height: 50px;
+	         background-color: red;
+	         -webkit-translation:all 0.3s;
+	}      
+	</style>	
+</head>
+<body>
+    <div id="canvas"  style="position: relative;width:100%;height: 100%;"></div>
+</body>
+<script type="text/javascript">
+
+var event_Module=(function(){
+      var  util={},
+           canvas = document.getElementById("canvas"),
+           spirit, startX, startY, clientW, clientH;
+
+ 
+			 util.touchStart=function(event) {
+			         event.preventDefault();
+			         if (spirit ||! event.touches.length) return;
+			         var touch = event.touches[0];
+			         clientW = document.body.clientWidth;
+			         clientH = document.body.clientHeight;
+			         startX = touch.pageX;
+			         startY = touch.pageY;
+			         spirit = document.createElement("div");
+			         spirit.className = "spirit";
+			         canvas.appendChild(spirit);
+			          // spirit.style.left = startX + 'px';
+			          // spirit.style.top = startY+ 'px'; 
+			          spirit.style.webkitTransform="translate3d("+(startX-spirit.offsetWidth/2)+"px,"+(startY-spirit.offsetHeight/2)+"px,"+"0)"
+			         
+			};
+	 
+			util.touchMove=function(event){
+			        event.preventDefault();
+			        if(!spirit || !event.touches.length) return;
+			        var touch = event.touches[0],
+			            posX,posY;
+ 		                
+ 		                posX = touch.pageX-spirit.offsetWidth/2,
+		                posY = touch.pageY-spirit.offsetHeight/2;
+
+                        if(posX<=0){
+                           posX=0; 
+		                }else if(touch.pageX+spirit.offsetHeight/2>=clientW){
+                           posX=clientW-spirit.offsetHeight;
+		                }
+
+                        if(posY<=0){
+                           posY=0; 
+		                }else if(touch.pageY+spirit.offsetWidth>=clientH){
+                           posY=clientH-spirit.offsetWidth;
+		                }
+	               
+
+			           spirit.style.webkitTransform="translate3d("+ posX +"px,"+ posY +"px,"+"0)";
+
+			           return posX;      
+
+			};
+
+			canvas.addEventListener("touchstart", util.touchStart, false);
+			canvas.addEventListener("touchmove", util.touchMove, false);
+
+			return util;      
+}());
+</script>	
+</html>

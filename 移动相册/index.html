@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/> 
+<title>无标题文档</title>
+<link type="text/css" rel="stylesheet" href="css/animate.css">
+<script type="text/javascript" src="js/zepto.min.js"></script>
+<script type="text/javascript" src="js/touch.js"></script>
+<style type="text/css">
+*{
+   padding:0px;
+   margin:0px;	
+	}
+html,body{
+    background:black;
+	overflow:hidden;	
+	}	
+ul{
+   list-style:none;
+	}
+ul li{
+   float:left;
+   overflow:hidden;	
+	}		
+.mask{
+      background:#000;
+	  position:absolute;
+	  width:100%;
+	  height:100%;
+	  left:0px;
+	  top:0px;
+	  display:none;	
+	}  
+</style>
+</head>
+
+<body>
+  <ul id="container"></ul>
+  <div class="mask"></div>  
+</body>
+<script type="text/javascript">
+ var ua = navigator.userAgent.toLowerCase();
+ var ClICK=''; 
+    if(/iphone|ipad|android/.test(ua)){
+		 ClICK='tap';
+		}else{
+	     ClICK='click';
+			}
+
+
+   var totle = 10,
+       oUL = $('#container'),
+	   winW = $(window).width(), winH = $(window).height(),html = ''
+	   padding = 2,paddingLeft = 2,liW = 0,Ali=oUL.children('li'),flag=0;
+	   document.addEventListener('touchmove',function(e){
+		       e.preventDefault();   
+		   },false)
+	   
+	   liW=Math.floor(winW-padding*3)/4;
+	   
+	   for(var i=1;i<=totle;i++){
+		   var src='images/'+i+'.jpg';
+		    if(i%4==1){
+	 			paddingLeft=0;
+				}else{
+				paddingLeft=2;	
+					}
+		    html+='<li class="animated bounceIn" style="width:'+liW+'px;height:'+liW+'px;padding-top:'+padding+'px;padding-left:'+paddingLeft+
+			'px"><canvas id="cid_'+i+'"></canvas></li>';
+			
+			var imgObj=new Image();
+			    imgObj.index=i;
+				
+				imgObj.onload=function(){
+				    var cid=$('#cid_'+this.index)[0].getContext("2d");
+						cid.width=this.width;
+						cid.height=this.height;
+						cid.drawImage(this,0,0);
+					}
+					
+					imgObj.src=src;
+		   }
+	   oUL.html(html);
+
+	   oUL.delegate('li',ClICK,function(){
+		       var _this=flag=$(this).index();			   
+			       loadImg(flag);			   		   
+		   });
+
+		   function loadImg(flag,dir){
+				 var imgObj=new Image();
+				 var dirAnimate=null;
+				 
+				 if(!dir){
+					 dir='fadeInDown';
+					 }
+					 $('.mask').show();			       
+					 imgObj.onload=function(){
+						  var ImgW=this.width;
+						  var ImgH=this.height;
+						  var realW=winH*ImgW/ImgH;
+						  var realH=winW*ImgH/ImgW;
+						  var paddingT=parseInt(winH/2-realH/2);
+						  var paddingL=parseInt(winW/2-realW/2);
+						  
+					  
+						  if(ImgH/ImgW>1.2){
+							  $('.mask').html('<img src='+imgObj.src+' style="height:100%;padding-left:'+paddingL+'px" class="animated '+dir+'">');
+													  
+							  }else{
+								$('.mask').html('<img src='+imgObj.src+' style="width:100%;padding-top:'+paddingT+'px" class="animated '+dir+'">');	
+								  }
+								  
+							$('.mask img')[0].addEventListener('webkitAnimationEnd',function(){
+								  //alert('此处是测试webkitAnimationEnd方法');
+								})	  
+							  
+						 }
+					 
+					 imgObj.src='images/'+(flag+1)+'larget.jpg';				   
+			   }		   
+		   
+		   
+		   $('.mask').on(ClICK,function(e){
+			     $(this).hide();
+				 e.stopPropagation(); 
+			   });
+			   
+		  $('.mask').delegate('img','swipeLeft',function(){
+			    if(flag>=totle-1){
+					 flag=totle-1;
+					}else{
+				     flag++;	
+						}		
+				loadImg(flag,'fadeInRight'); 
+			  }); 
+			  
+		  $('.mask').delegate('img','swipeRight',function(){
+			    if(flag<=0){
+					 flag=0;
+					}else{
+				     flag--;	
+						}		
+				loadImg(flag,'fadeInLeft'); 
+			  });			    
+	
+	 
+</script>
+</html>

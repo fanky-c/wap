@@ -1,0 +1,249 @@
+<!doctype html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no" /> 
+	<title></title>
+  <script src="zepto.min.js"></script>
+</head>
+<style type="text/css">
+	*{
+		padding: 0px;
+		margin: 0px;
+	}
+	html,body{
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+		background: #333;
+	}
+	ul,li{
+		list-style-type: none;
+		width: 100%;
+		height: 100%;
+	}
+	li{
+		 position: absolute;
+		 display: -webkit-box;
+		 -webkit-box-align:center;
+		 -webkit-box-pack:center;
+	}
+	img{
+		max-width: 100%;
+		max-height: 100%;
+	}
+
+	#canvas{
+		width: 100%;
+		height: 100%;
+	}
+
+</style>
+<body>
+<div id="canvas">
+</div>
+</body>
+<script type="text/javascript">
+	function zcSlider(opts){
+		this.wrap=opts.dom;
+		this.list=opts.list;
+              
+        //构造执行
+		this.init();
+		this.renderDom();
+		this.bindDom()
+	}
+
+	zcSlider.prototype.init=function(){
+        this.radion=window.innerHeight/window.innerWidth; //窗口比例
+        this.scaleW=window.innerWidth;                    //设置一个页面的宽度 
+        this.scaleH=window.innerHeight;                   //设置一个页面的高度      
+        this.index=0;                                     //设置索引值
+	};
+
+	zcSlider.prototype.renderDom=function(){
+        var that=this;
+        var wrap=this.wrap;
+        var data=this.list;
+        var len=data.length;
+        var width=this.scaleW;
+        var height=this.scaleH;
+
+        this.outElement=document.createElement('ul');
+
+        for(var i=0;i<len;i++){
+           var oli=document.createElement('li');
+           var item=data[i];
+           var img =new Image();
+               
+               img.src=item['img'];
+
+              var oli=document.createElement('li');
+                  oli.style.width=width+'px';
+                  oli.style.webkitTransform='translate3d('+i*width+'px,0,0)';
+
+               if(item){  //判断图片的长宽比例
+                 if(item.height/item.width > that.radion){
+                    oli.innerHTML='<img height="'+ height +'" src="'+item.img+'">';  
+                 }else{
+                    oli.innerHTML='<img width="'+ width +'" src="'+item.img+'">';
+                 }
+               }
+
+               that.outElement.appendChild(oli);  //添加到ul中 
+
+
+                // (function(i){
+                //    img.onload=function(){
+                //       var oli=document.createElement('li');
+                //           oli.style.width=width+'px';
+                //           oli.style.webkitTransform='translate3d('+i*width+'px,0,0)';
+
+                //        if(item){  //判断图片的长宽比例
+                //          if(this.height/this.width > that.radion){
+                //             oli.innerHTML='<img height="'+ height +'" src="'+this.src+'">';  
+                //          }else{
+                //             oli.innerHTML='<img width="'+ width +'" src="'+this.src+'">';
+                //          }
+                //        }
+
+                //        that.outElement.appendChild(oli);  //添加到ul中 
+                //    }
+                // })(i); 
+
+                //    img.onload=(function(i){   
+                //           return function(){
+                //                   var oli = document.createElement('li');
+                //                   console.log(i);
+                //                   oli.style.width = width + 'px';
+                //                   oli.style.webkitTransform = 'translate3d(' + i * width + 'px,0,0)';
+
+                //                   if (item) { //判断图片的长宽比例
+                //                     if (this.height / this.width > that.radion) {
+                //                       oli.innerHTML = '<img height="' + height + '" src="' + this.src + '">';
+                //                     } else {
+                //                       oli.innerHTML = '<img width="' + width + '" src="' + this.src + '">';
+                //                     }
+                //                   }
+
+                //                   that.outElement.appendChild(oli); //添加到ul中
+                //           }
+                 
+                // })(i)
+
+
+
+        }
+
+        this.wrap.appendChild(this.outElement);  //添加到最外面的容器
+	};
+
+	zcSlider.prototype.bindDom=function(){
+		 var that=this;
+		 var width=that.scaleW;
+		 var outElement=that.wrap;
+		 var len=that.list.length;
+
+         function startHandler(evt){
+            that.startTime=new Date()*1;        //记录按下去时间
+            that.startX=evt.touches[0].pageX;   //记录手指按下去的坐标
+            that.offsetX=0;                     //清除偏移量
+           
+           var target=evt.target; 
+              while(target.nodeName!='LI' && target.nodeName!='BODY'){
+                    target=target.parentNode;
+              }
+
+              that.target=target;
+
+         };
+
+         function moveHandler(evt){
+         	 evt.preventDefault();  //阻止默认行为
+
+         	 that.offsetX=evt.touches[0].pageX-that.startX;
+
+         	 var list=outElement.getElementsByTagName('li');
+         	 var i=that.index-1;   //开始索引
+         	 var m=i+3;            //结束索引
+            
+             for(i;i<m;i++){      //操作DOM元素
+                  list[i]&&(list[i].style.webkitTransition="-webkit-transform 0s ease-out");
+                  list[i]&&(list[i].style.webkitTransform='translate3d('+ ((i-that.index)*width + that.offsetX) +'px,0,0)')
+             }  
+         };
+
+         function endHandler(evt){
+               evt.preventDefault();
+               
+               var boundary=that.scaleW/6;  //设置边界点
+
+               var endTime=new Date()*1     //手指抬起时间
+
+               if(endTime-that.startTime<300){   //用户快速切换
+               	   if(that.offsetX>=boundary){
+                        that.go('-1');
+               	   }else if(that.offsetX<0&&that.offsetX<-boundary){
+                           that.go('+1');
+               	   }else{
+               	   	     that.go('0');
+               	   }
+                       
+               }else{                          //用户正常切换
+                   if(that.offsetX>50){
+                         that.go('-1')
+                   }else if(that.offsetX<-50){
+                         that.go('+1')
+                   }else{
+                         that.go('0')
+                   }
+               }
+
+         };                  
+
+        //注册事件
+        outElement.addEventListener('touchstart',startHandler);
+        outElement.addEventListener('touchmove',moveHandler);
+        outElement.addEventListener('touchend',endHandler);
+	};
+   
+   zcSlider.prototype.go=function(n){
+ 			var index = this.index;
+			var list = this.outElement.getElementsByTagName('li');
+			var len = list.length;
+			var cidx;
+            
+            if(typeof n =='number'){
+                 cidx=index; 
+            }else if(typeof n =='string'){
+                 cidx=index+n*1
+            }
+
+            if(cidx>len-1){
+                cidx=len-1;
+            }else if(cidx<0){
+                cidx=0;
+            }
+
+
+            this.index=cidx;
+
+            list[cidx].style.webkitTransition='-webkit-transform 0.2s ease-out';
+            list[cidx-1]&&(list[cidx-1].style.webkitTransition='-webkit-transform 0.2s ease-out');
+            list[cidx+1]&&(list[cidx+1].style.webkitTransition='-webkit-transform 0.2s ease-out');
+
+            list[cidx].style.webkitTransform='translate3d(0px,0px,0px)';
+            list[cidx-1]&&(list[cidx-1].style.webkitTransform='translate3d(-'+this.scaleW+'px,0px,0px)');
+            list[cidx+1]&&(list[cidx+1].style.webkitTransform='translate3d('+this.scaleW+'px,0px,0px)');
+
+   }	
+
+
+
+	new zcSlider({
+		dom:document.getElementById('canvas'),
+		list:[{img: "imgs/1larget.jpg",width:100,height:4000},{img: "imgs/2larget.jpg",width:100,height:4000},{img: "imgs/3larget.jpg",width:100,height:4000},{img: "imgs/4larget.jpg",width:100,height:4000},
+    {img: "imgs/5larget.jpg",width:6100,height:100},{img: "imgs/6larget.jpg",width:100,height:4000},{img: "imgs/7larget.jpg",width:100,height:4000},{img: "imgs/8larget.jpg",width:100,height:400},]
+	})
+</script>
+</html>		

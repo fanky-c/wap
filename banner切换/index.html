@@ -1,0 +1,142 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="initial-scale=1,user-scalable=0,width=device-width,maximum-scale=1,minimum-scale=1">
+	</head>
+	<style type="text/css">
+       *{
+       	padding:0px;
+       	margin: 0px;
+       }
+       ul li{
+       	list-style-type: none;
+       }
+       .scrollUl{
+       	  height:100px;
+       	  width:100%;
+       	  position: relative;
+       	  overflow: hidden;
+       }
+       .scrollUl li{
+       	  height:100%;
+       	  width:100%;
+       	  position: absolute;
+       	  transform:translate(100%,0);
+		  -webkit-transform:translate(100%,0);
+       }
+       .scrollUl li:nth-child(1){
+       	 background: red;
+       }
+       .scrollUl li:nth-child(2){
+       	 background: green;
+       }
+        .scrollUl li:nth-child(3){
+       	 background: blue;
+       }  
+        .scrollUl li:nth-child(4){
+       	 background: yellow;
+       }                    
+	</style>
+	<body>
+		<ul class="scrollUl">
+			<li>1</li>
+			<li>2</li>
+			<li>3</li>
+			<li>4</li>
+		</ul>
+	</body>
+     <script type="text/javascript" src="js/zepto.min.js"></script>
+     <script type="text/javascript" src="js/touch.js"></script>
+     <script type="text/javascript" src="js/fx.js"></script>
+  	 <script type="text/javascript">
+      var winW=$(window).width(),
+          ul=$('.scrollUl'),li=ul.children('li'),flag=0,flagBtn=true,activeIndex=0;
+           
+				   
+          //初始化
+          li.eq(0).css({'transform':'translate3d(0,0,0)','-webkit-transform':'translate3d(0,0,0)'}).addClass('active');
+          
+          //阻止默认行为
+          document.addEventListener('touchmove',function(event){
+                event.preventDefault();
+            },false);
+        
+          
+          //左滑动
+            ul.on('swipeLeft',function(){
+              if(flagBtn==true){
+                
+                flagBtn=!flagBtn;
+                
+                if(flag>=li.size()-1){
+                      flag=0;
+                }else{ 
+                      flag++;
+                }
+                activeIndex=ul.children('li.active').index();
+                
+                li.eq(flag-1).anim({'transform':'translate3d('+-winW+'px,0,0)','-webkit-transform':'translate3d('+-winW+'px,0,0)'},0.5,'cubic-bezier(0.1, 0.57, 0.1, 1)',function(){
+                     $(this).css({'transform':'translate3d('+winW+'px,0,0)','-webkit-transform':'translate3d('+winW+'px,0,0)'})
+                });
+                
+                li.eq(flag).anim({'transform':'translate3d(0px,0,0)','-webkit-transform':'translate3d(0px,0,0)'},0.5,'cubic-bezier(0.1, 0.57, 0.1, 1)',function(){
+                      $(this).addClass('active').siblings('li').removeClass('active');
+                      flagBtn=true;
+                });
+                }               
+            })
+
+          //右滑动
+            ul.on('swipeRight',function(){
+             if(flagBtn==true){
+                
+                flagBtn=!flagBtn;
+
+                if(flag<=0){
+                      flag=li.size()-1;
+                }else{ 
+                      flag--;
+                }
+                activeIndex=ul.children('li.active').index();
+                
+                li.eq(flag).css({'transform':'translate3d('+-winW+'px,0,0)','-webkit-transform':'translate3d('+-winW+'px,0,0)'})
+                
+                li.eq(activeIndex).anim({'transform':'translate3d('+winW+'px,0,0)','-webkit-transform':'translate3d('+winW+'px,0,0)'},0.5,'cubic-bezier(0.1, 0.57, 0.1, 1)');
+                
+                li.eq(flag).anim({'transform':'translate3d(0px,0,0)','-webkit-transform':'translate3d(0px,0,0)'},0.5,'cubic-bezier(0.1, 0.57, 0.1, 1)',function(){
+                     $(this).addClass('active').siblings('li').removeClass('active');
+                     flagBtn=true;
+                });
+                }                
+            })            
+
+
+     function getPos(obj,startFn,fning){   //获取手机在屏幕移动的距离
+       var pos={'left':0,'top':0};
+       
+        this.x=null;
+        this.y=null;
+    
+       obj.addEventListener('touchstart',function(event){   //开始触摸屏幕
+           pos.left=event.targetTouches[0].pageX;
+           pos.top=event.targetTouches[0].pageY;       
+           if(startFn) startFn.apply(this);
+       },false);
+       
+     obj.addEventListener('touchmove',function(event){   //滑动屏幕
+           this.x=event.targetTouches[0].pageX-pos.left,
+           this.y=event.targetTouches[0].pageY-pos.top;
+               
+           event.preventDefault();
+           
+          if(fning) fning.apply(this);        
+      },false);
+	  
+	    
+  
+}
+           
+
+	   </script>
+</html>
